@@ -56,18 +56,15 @@ class PolyTerm():
     return self.deriv_term().solve(x)
 
   def deriv_term(self) -> Term:
-    if exponent == 1:
-      return NumTerm(coefficient)
+    if self.exponent == 1:
+      return NumTerm(self.coefficient)
       
-    return PolyTerm(coefficient * )
+    return PolyTerm(self.coefficient * self.exponent, self.exponent - 1)
 
   def integral(self, x: float) -> float:
-    raise NotImplementedError
+    return self.integral_term().solve(x)
 
   def integral_term(self) -> Term:
-    raise NotImplementedError
-    
-  def __add__(self, x: float):
-    raise NotImplementedError
+    return PolyTerm(self.coefficient / (self.exponent + 1), self.exponent + 1)
   
     

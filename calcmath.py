@@ -84,14 +84,13 @@ class CalcMath:
         i = 0
         step /= 10
       i += step
-  def natural_log(x: float, step_size: float=1E-6):
+  def natural_log(x: float):
     if(x <= 0):
       raise Exception("Domain Error: The domain is (0, inf)")
-    if(step_size <= 0 or step_size > 1):
-      raise Exception("Step size is too big, or it is negative.")
+    
     # use Euler's method
     y0 = 0
-    step = (x - 1) * step_size
+    step = (x - 1) / CalcMath.ipow(10, len(str(x)) - 2)
     x0 = 1
     while(x0 <= x):
       derivative = 1 / x0
