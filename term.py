@@ -24,8 +24,11 @@ class Term():
   def integral_term(self) -> Term:
     raise NotImplementedError
 
+  def __repr__():
+    return f"Term: ({self.__str__()})"
 
-class NumTerm():
+
+class NumTerm(Term):
   def __init__(self, num: float):
     self.num = num
 
@@ -45,8 +48,17 @@ class NumTerm():
   def integral_term(self) -> Term:
     return PolyTerm(self.num, 1)
 
+  def __str__(self):
+    return f"{self.num}"
+
+  def __float__():
+    return self.num
+
+  def __int__(self):
+    return int(self.__float__())
+
   
-class PolyTerm():
+class PolyTerm(Term):
 
   def __init__(self, coefficient: float, exponent: int):
     self.coefficient = coefficient
@@ -73,5 +85,8 @@ class PolyTerm():
 
   def integral_term(self) -> Term:
     return PolyTerm(self.coefficient / (self.exponent + 1), self.exponent + 1)
+
+  def __str__(self):
+    return f"({self.coefficient}x^({self.exponent}))"
   
     
