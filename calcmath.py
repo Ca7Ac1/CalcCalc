@@ -110,5 +110,7 @@ class CalcMath:
 
     return base * CalcMath.ipow(base, power - 1)
       
-  # def pow(base: Union[float, int], power: Union[float, int]) -> Union[float, int]:
+  def pow(base: Union[float, int], power: Union[float, int]) -> Union[float, int]:
+    #TODO
+    return 0
       
