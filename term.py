@@ -7,14 +7,19 @@ class Term():
   def solve(self, x: float) -> float:
     raise NotImplementedError
 
-  def deriv_solve(self, x: float) -> float:
-    raise NotImplementedError
+  def deriv_solve(self, x: float, error: float=1E-11) -> float:
+    return (solve(x + error) - solve(x)) / error
 
   def deriv_term(self) -> Term:
     raise NotImplementedError
 
-  def integral(self, x: float) -> float:
-    raise NotImplementedError
+  def integral_solve(self, left: float, right: float, error: float=1E-3) -> float:
+    x = left
+    area = 0
+
+    while x < right:
+      area += (solve(x) + solve(x + error)) * error / 2
+      x += error 
 
   def integral_term(self) -> Term:
     raise NotImplementedError
@@ -33,8 +38,9 @@ class NumTerm():
   def deriv_term(self) -> Term:
     return 0
 
-  def integral(self, x: float) -> float:
-    return integral_term().solve(x)
+  def integral_solve(self, left: float, right: float) -> float:
+    integral = self.integral_term()
+    return integral.solve(right) - integral.solve(left)
 
   def integral_term(self) -> Term:
     return PolyTerm(self.num, 1)
@@ -42,15 +48,15 @@ class NumTerm():
   
 class PolyTerm():
 
-  def __init__(self, coefficient: float, exponent: float):
+  def __init__(self, coefficient: float, exponent: int):
     self.coefficient = coefficient
     self.exponent = exponent
 
-    if self.exponent == 0:
+    if self.exponent <= 0:
       raise Exception("polyterm cannot have 0 exponent")
 
   def solve(self, x: float) -> float:
-    return self.coefficient * calcmath.CalcMath.pow(x, self.exponent)
+    return self.coefficient * calcmath.CalcMath.ipow(x, self.exponent)
 
   def deriv_solve(self, x: float) -> float:
     return self.deriv_term().solve(x)
@@ -61,8 +67,9 @@ class PolyTerm():
       
     return PolyTerm(self.coefficient * self.exponent, self.exponent - 1)
 
-  def integral(self, x: float) -> float:
-    return self.integral_term().solve(x)
+  def integral_solve(self, left: float, right: float) -> float:
+    integral = self.integral_term()
+    return integral.solve(right) - integral.solve(left)
 
   def integral_term(self) -> Term:
     return PolyTerm(self.coefficient / (self.exponent + 1), self.exponent + 1)
