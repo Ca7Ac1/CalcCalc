@@ -54,13 +54,20 @@ class CalcMath:
     val = CalcMath.cos(x)
     if val == 0:
       return float('inf')
-    return 1.0 / CalcMath.cos(x)
+    return 1.0 / val
   
   def csc(x: float) -> float:
     val = CalcMath.sin(x)
     if val == 0:
       return float('inf')
-    return 1.0 / CalcMath.sin(x)
+    return 1.0 / val
+
+  def cot(x: float) -> float:
+    val = CalcMath.tan(x)
+    if val == 0:
+      return float('inf')
+    return 1.0 / val
+    
   def arctan(x: float, error: float=2E-7) -> float:
     x = x % (2 * CalcMath.PI)
     n = 0
@@ -72,31 +79,30 @@ class CalcMath:
         n += 1
     return result
   # this is super dumb lol
-  def arccos(x: float, error: float=1E-5):
-    if(x > 1 or x < -1):
-      raise Exception("Domain error: The domain is [-1, 1]")
-    step = 0.001
-    i = 0
-    while(i <= 2 * CalcMath.PI):
-      if(CalcMath.cos(i) >= x - error and CalcMath.cos(i) <= x + error):
-        return i
-      if(i + step >= 2 * CalcMath.PI):
-        i = 0
-        step /= 10
-      i += step
-  def natural_log(x: float):
+  # def arccos(x: float, error: float=1E-5):
+  #   if(x > 1 or x < -1):
+  #     raise Exception("Domain error: The domain is [-1, 1]")
+  #   step = 0.001
+  #   i = 0
+  #   while(i <= 2 * CalcMath.PI):
+  #     if(CalcMath.cos(i) >= x - error and CalcMath.cos(i) <= x + error):
+  #       return i
+  #     if(i + step >= 2 * CalcMath.PI):
+  #       i = 0
+  #       step /= 10
+  #     i += step
+  def natural_log(x: float, delta: float=1E-3):
     if(x <= 0):
       raise Exception("Domain Error: The domain is (0, inf)")
     
     # use Euler's method
-    y0 = 0
-    step = (x - 1) / CalcMath.ipow(10, len(str(x)) - 2)
+    integral = 0
     x0 = 1
     while(x0 <= x):
       derivative = 1 / x0
-      y0 = y0 + step * derivative
-      x0 += step
-    return y0
+      integral += delta * derivative
+      x0 += delta
+    return integral
 
   def ipow(base: Union[int, float], power: int) -> int:
     if power < 0:
@@ -113,4 +119,8 @@ class CalcMath:
   def pow(base: Union[float, int], power: Union[float, int]) -> Union[float, int]:
     #TODO
     return 0
-      
+
+  def log(val: float, base: float, delta: float=1E-3):
+    return CalcMath.natural_log(val, delta) / CalcMath.natural_log(base, delta)
+
+    
