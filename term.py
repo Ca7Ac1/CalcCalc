@@ -39,22 +39,7 @@ class Term():
     while(self.solve(x) > error or self.solve(x) < -1 * error):
       x = x - (self.solve(x) / self.deriv_solve(x))
       print(x)
-    return x
-  def zeroes(self, lbound, rbound, error=1E-8):
-    mid = (lbound + rbound) / 2
-    if(self.solve(mid + error) > 0):
-      if(self.solve(rbound) > 0):
-        Term.zeroes(self, lbound, mid - error)
-      else:
-        Term.zeroes(self, mid + error, rbound)
-    elif(self.solve(mid - error) < 0):
-      if(self.solve(rbound) > 0):
-        Term.zeroes(self, mid + error, rbound)
-      else:
-        Term.zeroes(self, lbound, mid - error)
-    print(mid)
-    return mid
-
+    return x  
   def __repr__(self):
     return f"Term: ({self.__str__()})"
 
