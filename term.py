@@ -29,6 +29,7 @@ class Term():
   def __repr__(self):
     return f"Term: ({self.__str__()})"
 
+    
 
 ### MULTITERM ###
 class MultiTerm(Term):
@@ -46,8 +47,8 @@ class MultiTerm(Term):
   def deriv_solve(self, x: float, error: float=1E-11) -> float:
     sol = 0
     
-    for term in self.deriv_term().terms:
-      sol += term.solve(x)
+    for term in self.terms:
+      sol += term.deriv_solve(x, error)
 
     return sol
 
@@ -62,8 +63,8 @@ class MultiTerm(Term):
   def integral_solve(self, left: float, right: float, error: float=1E-3) -> float:
     sol = 0
     
-    for term in self.integral_term().terms:
-      sol += term.solve(left, right, error)
+    for term in self.terms:
+      sol += term.integral_solve(left, right, error)
 
     return sol 
 
@@ -78,6 +79,26 @@ class MultiTerm(Term):
   def __str__(self):
     return f"[{' + '.join(str(i) for i in self.terms)}]"
 
+
+### PRODUCTTERM ###
+class ProductTerm(Term):
+  def __init__(self, l: Term, r: Term):
+    self.l = l
+    self.r = r
+  
+  def solve(self, x: float) -> float:
+    return self.l.solve(x) * self.r.solve(x)
+
+  def deriv_solve(self, x: float, error: float=1E-11) -> float:
+    return self.l.deriv_solve(x) * self.r.solve(x) + self.r.deriv_solve(x) * self.l.solve(x)
+
+  def deriv_term(self) -> Term:
+    return MultiTerm([ProductTerm(self.l.deriv_term(), self.r), ProductTerm(self.r.deriv_term(), self.l)])
+
+  def __str__(self):
+    return f"({str(self.l)} * {str(self.r)})"
+
+    
 ### NUMTERM ###
 class NumTerm(Term):
   def __init__(self, num: float):
@@ -86,13 +107,13 @@ class NumTerm(Term):
   def solve(self, x: float) -> float:
     return self.num
 
-  def deriv_solve(self, x: float) -> float:
+  def deriv_solve(self, x: float, error: float=1E-1) -> float:
     return self.num
 
   def deriv_term(self) -> Term:
     return NumTerm(0)
 
-  def integral_solve(self, left: float, right: float) -> float:
+  def integral_solve(self, left: float, right: float, error: float=1E-1) -> float:
     integral = self.integral_term()
     return integral.solve(right) - integral.solve(left)
 
@@ -122,7 +143,7 @@ class PolyTerm(Term):
   def solve(self, x: float) -> float:
     return self.coefficient * calcmath.CalcMath.ipow(x, self.exponent)
 
-  def deriv_solve(self, x: float) -> float:
+  def deriv_solve(self, x: float, error: 1E-1) -> float:
     return self.deriv_term().solve(x)
 
   def deriv_term(self) -> Term:
@@ -131,7 +152,7 @@ class PolyTerm(Term):
       
     return PolyTerm(self.coefficient * self.exponent, self.exponent - 1)
 
-  def integral_solve(self, left: float, right: float) -> float:
+  def integral_solve(self, left: float, right: float, error: float=1E-1) -> float:
     integral = self.integral_term()
     return integral.solve(right) - integral.solve(left)
 
@@ -180,23 +201,12 @@ class ExpTerm(Term):
     
     return self.coefficient * calcmath.CalcMath.pow(self.base, e)
 
-  def deriv_solve(self, x: float, error: float=1E-11) -> float:
-    return self.deriv_term().solve(x)
+  # def deriv_solve(self, x: float, error: float=1E-11) -> float:
+  #   return self.deriv_term().solve(x)
 
   def deriv_term(self) -> Term:
     #TODO: Do this
     return 0
-
-  def integral_solve(self, left: float, right: float, error: float=1E-3) -> float:
-    x = left
-    area = 0
-
-    while x < right:
-      area += (self.solve(x) + self.solve(x + error)) * error / 2
-      x += error 
-
-  def integral_term(self) -> Term:
-    raise NotImplementedError
 
   def __repr__(self):
     return f"Term: ({self.__str__()})"
