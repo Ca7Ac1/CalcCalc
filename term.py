@@ -122,7 +122,7 @@ class NumTerm(Term):
     return self.num
 
   def deriv_solve(self, x: float, error: float=1E-1) -> float:
-    return self.num
+    return 0
 
   def deriv_term(self) -> Term:
     return NumTerm(0)
