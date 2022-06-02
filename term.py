@@ -25,6 +25,7 @@ class Term():
 
   def integral_term(self) -> Term:
     raise NotImplementedError
+    
   def graph(self):
     x = []
     y = []
@@ -34,12 +35,25 @@ class Term():
       y.append(self.solve(i))
       i += 0.001
     return [x, y]
+    
   def newtonsmethod(self, start, error=1E-8):
     x = start
     while(self.solve(x) > error or self.solve(x) < -1 * error):
       x = x - (self.solve(x) / self.deriv_solve(x))
       print(x)
     return x  
+
+  # def __iter__(self):
+  #   self.iter = True
+  #   return self
+
+  # def __next___(self):
+  #   if self.iter:
+  #     self.iter = False
+  #     return self
+      
+  #   raise StopIteration
+  
   def __repr__(self):
     return f"Term: ({self.__str__()})"
 
@@ -104,7 +118,7 @@ class ProductTerm(Term):
     return self.l.solve(x) * self.r.solve(x)
 
   def deriv_solve(self, x: float, error: float=1E-11) -> float:
-    return self.l.deriv_solve(x) * self.r.solve(x) + self.r.deriv_solve(x) * self.l.solve(x)
+    return self.l.deriv_solve(x, error) * self.r.solve(x) + self.r.deriv_solve(x, error) * self.l.solve(x)
 
   def deriv_term(self) -> Term:
     return MultiTerm([ProductTerm(self.l.deriv_term(), self.r), ProductTerm(self.r.deriv_term(), self.l)])
@@ -112,6 +126,26 @@ class ProductTerm(Term):
   def __str__(self):
     return f"({str(self.l)} * {str(self.r)})"
 
+
+### DIVTERM ###
+class DivTerm(Term):
+  def __init__(self, n: Term, d: Term):
+    self.n = n
+    self.d = d
+  
+  def solve(self, x: float) -> float:
+    return self.n.solve(x) / self.d.solve(x)
+
+  def deriv_solve(self, x: float, error: float=1E-11) -> float:
+    return (self.d.solve(x) * self.n.deriv_solve(x, error) - self.n.solve(x, error) * self.d.deriv_solve(x)) / (calcmath.CalcMath.ipow(self.d.solve(x), 2))
+
+  def deriv_term(self) -> Term:
+    return DivTerm(MultiTerm([ProductTerm(self.d, self.n.deriv_term()), ProductTerm(-self.n, self.d.deriv_term())]), ProductTerm(self.d, self.d))
+
+  def __str__(self):
+    return f"({str(self.l)} * {str(self.r)})"
+
+    
     
 ### NUMTERM ###
 class NumTerm(Term):
@@ -208,19 +242,13 @@ class ExpTerm(Term):
     self.exp = exp
     
   def solve(self, x: float) -> float:
-    e = 0
+    return self.coefficient * calcmath.CalcMath.pow(self.base, self.exp.solve())
 
-    for term in self.exp:
-      e += term.solve()
-    
-    return self.coefficient * calcmath.CalcMath.pow(self.base, e)
-
-  # def deriv_solve(self, x: float, error: float=1E-11) -> float:
-  #   return self.deriv_term().solve(x)
+  def deriv_solve(self, x: float, error: float=1E-11) -> float:
+    return self.deriv_term().solve(x)
 
   def deriv_term(self) -> Term:
-    #TODO: Do this
-    return 0
+    return ProductTerm(self.exponent.deriv_term(), DivTerm(ExpTerm(self.coefficient, self.base, self.exp), NumTerm(calcmath.CalcMath.natural_log(self.base))))
 
   def __repr__(self):
     return f"Term: ({self.__str__()})"
