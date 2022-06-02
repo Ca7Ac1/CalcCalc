@@ -91,6 +91,16 @@ class CalcMath:
   #       i = 0
   #       step /= 10
   #     i += step
+
+  def exp(exponent: float, error: float=1E-11) -> float:
+    n = 0
+    result = 0
+    # while the next term is greater than our error
+    while CalcMath.abs_val((exponent ** n) / CalcMath.factorial(n)) > error:
+      result += exponent ** n / CalcMath.factorial(n)
+      n += 1
+    return result
+    
   def natural_log(x: float, delta: float=1E-3):
     if(x <= 0):
       raise Exception("Domain Error: The domain is (0, inf)")
@@ -116,9 +126,8 @@ class CalcMath:
 
     return base * CalcMath.ipow(base, power - 1)
       
-  def pow(base: Union[float, int], power: Union[float, int]) -> Union[float, int]:
-    #TODO
-    return 0
+  def pow(base: Union[float, int], power: Union[float, int], error: float=1E-6) -> Union[float, int]:
+    return CalcMath.exp(CalcMath.natural_log(base, error) * power, error)
 
   def log(val: float, base: float, delta: float=1E-3):
     return CalcMath.natural_log(val, delta) / CalcMath.natural_log(base, delta)

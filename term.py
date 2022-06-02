@@ -23,6 +23,8 @@ class Term():
       area += (self.solve(x) + self.solve(x + error)) * error / 2
       x += error 
 
+    return area
+
   def integral_term(self) -> Term:
     raise NotImplementedError
     
@@ -137,16 +139,14 @@ class DivTerm(Term):
     return self.n.solve(x) / self.d.solve(x)
 
   def deriv_solve(self, x: float, error: float=1E-11) -> float:
-    return (self.d.solve(x) * self.n.deriv_solve(x, error) - self.n.solve(x, error) * self.d.deriv_solve(x)) / (calcmath.CalcMath.ipow(self.d.solve(x), 2))
+    return (self.d.solve(x) * self.n.deriv_solve(x, error) - self.n.solve(x) * self.d.deriv_solve(x, error)) / (calcmath.CalcMath.ipow(self.d.solve(x), 2))
 
   def deriv_term(self) -> Term:
     return DivTerm(MultiTerm([ProductTerm(self.d, self.n.deriv_term()), ProductTerm(-self.n, self.d.deriv_term())]), ProductTerm(self.d, self.d))
 
   def __str__(self):
-    return f"({str(self.l)} * {str(self.r)})"
-
-    
-    
+    return f"({str(self.n)} / {str(self.d)})"
+  
 ### NUMTERM ###
 class NumTerm(Term):
   def __init__(self, num: float):
@@ -242,16 +242,16 @@ class ExpTerm(Term):
     self.exp = exp
     
   def solve(self, x: float) -> float:
-    return self.coefficient * calcmath.CalcMath.pow(self.base, self.exp.solve())
+    return self.coefficient * calcmath.CalcMath.pow(self.base, self.exp.solve(x))
 
   def deriv_solve(self, x: float, error: float=1E-11) -> float:
     return self.deriv_term().solve(x)
 
   def deriv_term(self) -> Term:
-    return ProductTerm(self.exponent.deriv_term(), DivTerm(ExpTerm(self.coefficient, self.base, self.exp), NumTerm(calcmath.CalcMath.natural_log(self.base))))
+    return ProductTerm(self.exp.deriv_term(), DivTerm(ExpTerm(self.coefficient, self.base, self.exp), NumTerm(calcmath.CalcMath.natural_log(self.base))))
 
-  def __repr__(self):
-    return f"Term: ({self.__str__()})"
+  def __str__(self):
+    return f"({self.coefficient} * {self.base} ^ {self.exp})"
 
 
 ### LNTERM ###
@@ -260,24 +260,14 @@ class LnTerm(Term):
     self.term = Term
   
   def solve(self, x: float) -> float:
-    raise NotImplementedError
+    return calcmath.CalcMath.natural_log(self.term.solve())
 
   def deriv_solve(self, x: float, error: float=1E-11) -> float:
-    return (self.solve(x + error) - self.solve(x)) / error
-
+    return self.deriv_term.solve(x)
+    
   def deriv_term(self) -> Term:
     raise NotImplementedError
 
-  def integral_solve(self, left: float, right: float, error: float=1E-3) -> float:
-    x = left
-    area = 0
-
-    while x < right:
-      area += (self.solve(x) + self.solve(x + error)) * error / 2
-      x += error 
-
-  def integral_term(self) -> Term:
-    raise NotImplementedError
-
-  def __repr__(self):
+  def __str__(self):
+    #TODO
     return f"Term: ({self.__str__()})"
