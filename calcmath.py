@@ -17,7 +17,7 @@ class CalcMath:
     while (CalcMath.abs_val(x * x - val) >= error):
       x = (x + (val / x)) / 2
   
-    return x
+    return x 
   
   def factorial(n: int) -> int:
     sol = 1

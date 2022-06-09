@@ -28,11 +28,11 @@ class Term():
   def integral_term(self) -> Term:
     raise NotImplementedError
     
-  def graph(self):
+  def graph(self, left: float, right: float):
     x = []
     y = []
-    i = -10
-    while(i <= 10):
+    i = left
+    while(i <= right):
       x.append(i)
       y.append(self.solve(i))
       i += 0.001
@@ -40,7 +40,7 @@ class Term():
     
   def newtonsmethod(self, start, error=1E-8):
     x = start
-    while(self.solve(x) > error or self.solve(x) < -1 * error):
+    while(calcmath.CalcMath.abs_val(self.solve(x))):
       x = x - (self.solve(x) / self.deriv_solve(x))
       print(x)
     return x  
@@ -191,7 +191,7 @@ class PolyTerm(Term):
   def solve(self, x: float) -> float:
     return self.coefficient * calcmath.CalcMath.ipow(x, self.exponent)
 
-  def deriv_solve(self, x: float, error: 1E-1) -> float:
+  def deriv_solve(self, x: float, error: float=1E-1) -> float:
     return self.deriv_term().solve(x)
 
   def deriv_term(self) -> Term:
@@ -208,30 +208,30 @@ class PolyTerm(Term):
     return PolyTerm(self.coefficient / (self.exponent + 1), self.exponent + 1)
 
   def __str__(self):
-    return f"({self.coefficient}x^({self.exponent}))"
+    return f"{self.coefficient}x^{self.exponent}"
 
 
 ### POWTERM ###
-class PowTerm(PolyTerm):
-  def __init__(self, coefficient: float, exponent: int):
+class PowTerm(Term):
+  def __init__(self, coefficient: float, base: Term, exponent: float):
     self.coefficient = coefficient
+    self.base = base
     self.exponent = exponent
 
   def solve(self, x: float):
-    return self.coefficient * calcmath.CalcMath.pow(x, self.exponent)
+    return self.coefficient * calcmath.CalcMath.pow(self.base.solve(x), self.exponent)
   
   def deriv_term(self) -> Term:
     if self.exponent == 1:
-      return NumTerm(self.coefficient)
+      return ProductTerm(NumTerm(self.coefficient), self.base)
 
-    return PowTerm(self.coefficient * self.exponent, self.exponent - 1)
-  
-  def integral_term(self) -> Term:
-    if self.exponent == -1:
-      #TODO: add ln here
-      return NumTerm(0)
+    return ProductTerm(self.base.deriv_term(), PowTerm(self.coefficient * self.exponent, self.base, self.exponent - 1)
 
-    return PowTerm(self.coefficient / (self.exponent + 1), self.exponent + 1)
+  def integral_solve(self, left: float, right: float, error: float=1E-3):
+    return super().integral_solve(left, right, error)
+      
+  def __str__(self):
+    return f"{self.coefficient}x^{self.exponent}"
 
 
 ### EXPTERM ###
@@ -254,20 +254,57 @@ class ExpTerm(Term):
     return f"({self.coefficient} * {self.base} ^ {self.exp})"
 
 
-### LNTERM ###
-class LnTerm(Term):
-  def __init__(self, coefficient, term: Term):
-    self.term = Term
+### LOGTERM ###
+class LogTerm(Term):
+  def __init__(self, coefficient: float, base: float, value: Term):
+    self.coefficent = coefficient
+    self.base = base
+    self.value = value
   
   def solve(self, x: float) -> float:
-    return calcmath.CalcMath.natural_log(self.term.solve())
+    return self.coefficient * calcmath.CalcMath.log(self.value.solve(), self.base)
 
   def deriv_solve(self, x: float, error: float=1E-11) -> float:
-    return self.deriv_term.solve(x)
+    return self.deriv_term().solve()
     
   def deriv_term(self) -> Term:
-    raise NotImplementedError
+    return DivTerm(self.value.deriv_term(), ProductTerm(NumTerm()))
 
   def __str__(self):
-    #TODO
-    return f"Term: ({self.__str__()})"
+    return f"{self.coefficent} * sin({self.value})"
+    
+### SINTERM ###
+class SinTerm(Term):
+  def __init__(self, coefficient: float, value: Term):
+    self.coefficient = coefficient
+    self.value = value
+  
+  def solve(self, x: float) -> float:
+    return self.coefficient * calcmath.CalcMath.sin(self.value.solve(x))
+
+  def deriv_solve(self, x: float, error: float=1E-11) -> float:
+    return self.deriv_term().solve(x)
+    
+  def deriv_term(self) -> Term:
+    return ProductTerm(self.value.deriv_term(), CosTerm(self.coefficient, self.value))
+
+  def __str__(self):
+    return f"({self.coefficent} * log base {self.base} of {str(self.value)})"
+
+### COSTERM ###
+class CosTerm(Term):
+  def __init__(self, coefficient: float, value: Term):
+    self.coefficient = coefficient
+    self.value = value
+  
+  def solve(self, x: float) -> float:
+    return self.coefficient * calcmath.CalcMath.cos(self.value.solve(x))
+
+  def deriv_solve(self, x: float, error: float=1E-11) -> float:
+    return self.deriv_term().solve(x)
+    
+  def deriv_term(self) -> Term:
+    return ProductTerm(self.value.deriv_term(), SinTerm(self.coefficient, self.value))
+
+  def __str__(self):
+    return f"{self.coefficient} * cos({self.value})"
