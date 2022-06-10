@@ -10,35 +10,47 @@ print(parse('3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3'.split()))
 path = Path(__file__).parent / 'voices/'
 parsing_string = ""
 sound = True
+
+
 def silly():
     sound = not(sound)
+
+
 def plus():
     global parsing_string
     parsing_string += "+ "
     playsound(f"{path}/plus.wav")
+
+
 def minus():
     global parsing_string
     parsing_string += "- "
     playsound(f"{path}/minus.wav")
+
+
 def times():
     global parsing_string
     parsing_string += "* "
     playsound(f"{path}/times.wav")
+
+
 class Application(tk.Frame):
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
         self.grid()
         self.createWidgets()
+
     def createWidgets(self):
-        buttons = [tk.Button(self, text='Quit', command=self.quit), tk.Button(self, text="+", command=plus), tk.Button(self, text="-", command=minus), tk.Button(self, text="x", command=times)]
+        buttons = [tk.Button(self, text='Quit', command=self.quit), tk.Button(
+            self, text="+", command=plus), tk.Button(self, text="-", command=minus), tk.Button(self, text="x", command=times)]
         for i in buttons:
             i.grid()
-        
+
         # self.quitButton = tk.Button(self, text='Quit', command=self.quit)
         # self.quitButton.grid()
         # self.plusButton = tk.Button(self, text="+", command=plus)
         # self.plusButton.grid()
-        
+
 
 app = Application()
 app.master.title('Sample application')
@@ -72,5 +84,3 @@ app.mainloop()
 # ax.set_ylim(ymin=-1.2, ymax=1.2)
 # ax.plot(x, y, linewidth=2)
 # plt.show()
-
-
