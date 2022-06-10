@@ -225,7 +225,7 @@ class PowTerm(Term):
     if self.exponent == 1:
       return ProductTerm(NumTerm(self.coefficient), self.base)
 
-    return ProductTerm(self.base.deriv_term(), PowTerm(self.coefficient * self.exponent, self.base, self.exponent - 1)
+    return ProductTerm(self.base.deriv_term(), PowTerm(self.coefficient * self.exponent, self.base, self.exponent - 1))
 
   def integral_solve(self, left: float, right: float, error: float=1E-3):
     return super().integral_solve(left, right, error)

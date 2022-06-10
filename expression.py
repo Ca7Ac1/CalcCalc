@@ -22,7 +22,7 @@ Formatting for our parsing:
     - log : log
       - base log value 
   - Ex : 1 + ( x + 9 ) ^ 3 - e ^ 5x
-  
+
 '''
 
 def isnumeric(val: str):
@@ -76,7 +76,7 @@ def parse(expression: str):
         output.put(operator.pop())
       operator.append(token)
     else:
-      print('invaid')
+      print('invalid')
       exit(-1)
 
       
