@@ -224,9 +224,12 @@ class PowTerm(Term):
     def solve(self, x: float):
         return self.coefficient * calcmath.CalcMath.pow(self.base.solve(x), self.exponent, 1E-3)
 
+    def deriv_solve(self, x: float, error: float = 1E-1) -> float:
+        return self.deriv_term().solve(x)
+
     def deriv_term(self) -> Term:
         if self.exponent == 1:
-            return ProductTerm(NumTerm(self.coefficient), self.base)
+            return self.base.deriv_term()
 
         return ProductTerm(self.base.deriv_term(), PowTerm(self.coefficient * self.exponent, self.base, self.exponent - 1))
 

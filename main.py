@@ -58,15 +58,17 @@ class Application(tk.Frame):
 
 expr = parse(input().split())
 print(expr.solve(5.7))
+print(expr.deriv_term())
+print(expr.deriv_solve(5.7))
 fig, ax = plt.subplots()
 ax.spines['left'].set_position('center')
 ax.spines['bottom'].set_position('center')
 ax.spines['right'].set_color('none')
 ax.spines['top'].set_color('none')
-data = expr.graph(1, 10)
+data = expr.graph(-5, 5)
 x = data[0]
 ax.set_xlim(xmin=-10, xmax=10)
 y = data[1]
-ax.set_ylim(ymin=-1, ymax=1)
+ax.set_ylim(ymin=-2, ymax=2)
 ax.plot(x, y, linewidth=2)
 plt.show()

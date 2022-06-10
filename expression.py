@@ -11,7 +11,10 @@ Formatting for our parsing:
   - Every token will be space seperated
   - Allows for default operations
   - Only allows for one variable which will be represented by x
+  - pi and e will be valid tokens
   - Other operations:
+    - p : polynomial
+        - coefficient p power
     - s : sin()
     - c : cos()
     - t : tan()
@@ -22,7 +25,7 @@ Formatting for our parsing:
     - ln : natural log
     - log : log
       - value log base 
-  - Ex : 1 + ( x + 9 ) ^ 3 - e ^ ( 5 * x )
+  - Ex : 1 + ( 1 p 2  + 9 ) ^ 3 - e ^ ( 5 * x )
 
 '''
 
@@ -35,7 +38,7 @@ def isnumeric(val: str):
         return False
 
 
-functions = ['s', 'c', 't', 'as', 'ac', 'at', 'ln']
+functions = ['p', 's', 'c', 't', 'as', 'ac', 'at', 'ln']
 
 flip = ['^']
 
@@ -63,6 +66,10 @@ def parse(expression: str):
             output.put('x')
         elif isnumeric(token):
             output.put(NumTerm(float(token)))
+        elif token == 'e':
+            output.put(NumTerm(CalcMath.e))
+        elif token == 'pi':
+            output.put(NumTerm(CalcMath.pi))
         elif token == '(':
             operator.append(token)
         elif token == ')':
@@ -93,7 +100,6 @@ def parse(expression: str):
     terms = []
 
     output = list(output.queue)
-    print(output)
 
     while len(output) > 0:
         t = output.pop(0)
@@ -113,8 +119,19 @@ def parse(expression: str):
                 output_term = ProductTerm(terms.pop(), terms.pop())
                 terms.append(output_term)
             elif t == '/':
-                output_term = DivTerm(terms.pop(), terms.pop())
+                denominator = terms.pop()
+                output_term = DivTerm(terms.pop(), denominator)
                 terms.append(output_term)
+            elif t == 'p':
+                power = terms.pop()
+                coefficient = terms.pop()
+
+                if isinstance(power, NumTerm) and isinstance(coefficient, NumTerm):
+                    output_term = PolyTerm(coefficient.num, int(power.num))
+                    terms.append(output_term)
+                else:
+                    print('invalid')
+                    exit()
             elif t == 's':
                 output_term = SinTerm(1, terms.pop())
                 terms.append(output_term)
@@ -132,11 +149,17 @@ def parse(expression: str):
                 terms.append(output_term)
             elif t == '^':
                 power = terms.pop()
+                base = terms.pop()
 
                 if isinstance(power, NumTerm):
                     power = power.num
 
-                    output_term = PowTerm(1, terms.pop(), power)
+                    output_term = PowTerm(1, base, power)
+                    terms.append(output_term)
+                elif isinstance(base, NumTerm):
+                    base = base.num
+
+                    output_term = ExpTerm(1, base, power)
                     terms.append(output_term)
                 else:
                     print('cant do this yet')
@@ -146,5 +169,4 @@ def parse(expression: str):
         else:
             terms.append(t)
         
-    print(output_term)
     return output_term
