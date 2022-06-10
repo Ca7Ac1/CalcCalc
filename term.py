@@ -211,7 +211,7 @@ class PolyTerm(Term):
         return PolyTerm(self.coefficient / (self.exponent + 1), self.exponent + 1)
 
     def __str__(self):
-        return f"{self.coefficient}x^{self.exponent}"
+        return f"({self.coefficient}x^{self.exponent})"
 
 
 ### POWTERM ###
@@ -222,7 +222,7 @@ class PowTerm(Term):
         self.exponent = exponent
 
     def solve(self, x: float):
-        return self.coefficient * calcmath.CalcMath.pow(self.base.solve(x), self.exponent)
+        return self.coefficient * calcmath.CalcMath.pow(self.base.solve(x), self.exponent, 1E-3)
 
     def deriv_term(self) -> Term:
         if self.exponent == 1:
@@ -234,7 +234,7 @@ class PowTerm(Term):
         return super().integral_solve(left, right, error)
 
     def __str__(self):
-        return f"{self.coefficient}x^{self.exponent}"
+        return f"({self.coefficient} * {str(self.base)}^{self.exponent})"
 
 
 ### EXPTERM ###
@@ -254,31 +254,30 @@ class ExpTerm(Term):
         return ProductTerm(self.exp.deriv_term(), DivTerm(ExpTerm(self.coefficient, self.base, self.exp), NumTerm(calcmath.CalcMath.natural_log(self.base))))
 
     def __str__(self):
-        return f"({self.coefficient} * {self.base} ^ {self.exp})"
+        return f"{self.coefficient} * {self.base} ^ {self.exp}"
 
 
 ### LOGTERM ###
 class LogTerm(Term):
     def __init__(self, coefficient: float, base: float, value: Term):
-        self.coefficent = coefficient
+        self.coefficient = coefficient
         self.base = base
         self.value = value
 
     def solve(self, x: float) -> float:
-        return self.coefficient * calcmath.CalcMath.log(self.value.solve(), self.base)
+        return self.coefficient * calcmath.CalcMath.log(self.value.solve(x), self.base)
 
     def deriv_solve(self, x: float, error: float = 1E-11) -> float:
         return self.deriv_term().solve()
 
     def deriv_term(self) -> Term:
-        return DivTerm(self.value.deriv_term(), ProductTerm(NumTerm()))
+        return DivTerm(self.value.deriv_term(), ProductTerm(LogTerm(1, CalcMath.calcmath.e, base), value))
 
     def __str__(self):
-        return f"{self.coefficent} * sin({self.value})"
+        return f"({self.coefficient} * log base {self.base} of {str(self.value)})"
+
 
 ### SINTERM ###
-
-
 class SinTerm(Term):
     def __init__(self, coefficient: float, value: Term):
         self.coefficient = coefficient
@@ -287,18 +286,18 @@ class SinTerm(Term):
     def solve(self, x: float) -> float:
         return self.coefficient * calcmath.CalcMath.sin(self.value.solve(x))
 
-    def deriv_solve(self, x: float, error: float = 1E-11) -> float:
+    def deriv_solve(self, x: float, error: float =1E-11) -> float:
         return self.deriv_term().solve(x)
 
     def deriv_term(self) -> Term:
         return ProductTerm(self.value.deriv_term(), CosTerm(self.coefficient, self.value))
 
     def __str__(self):
-        return f"({self.coefficent} * log base {self.base} of {str(self.value)})"
+        return f"{self.coefficient} * sin({self.value})"
+
+
 
 ### COSTERM ###
-
-
 class CosTerm(Term):
     def __init__(self, coefficient: float, value: Term):
         self.coefficient = coefficient
