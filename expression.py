@@ -82,7 +82,6 @@ def parse(expression: str):
                     output.put(operator.pop())
             except:
                 print('invalid')
-                exit(-1)
         elif token in functions:
             operator.append(token)
         elif token in pemdas:
@@ -91,7 +90,6 @@ def parse(expression: str):
             operator.append(token)
         else:
             print('invalid')
-            exit(-1)
 
     while len(operator) > 0:
         output.put(operator.pop())
@@ -131,7 +129,6 @@ def parse(expression: str):
                     terms.append(output_term)
                 else:
                     print('invalid')
-                    exit()
             elif t == 's':
                 output_term = SinTerm(1, terms.pop())
                 terms.append(output_term)
@@ -140,6 +137,9 @@ def parse(expression: str):
                 terms.append(output_term)
             elif t == 't':
                 output_term = TanTerm(1, terms.pop())
+                terms.append(output_term)
+            elif t == 'at':
+                output_term = ArctanTerm(1, terms.pop())
                 terms.append(output_term)
             elif t == 'ln':
                 output_term = LogTerm(1, CalcMath.e, terms.pop())

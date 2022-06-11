@@ -81,19 +81,6 @@ class CalcMath:
                 (2 * n + 1)  # add to result
             n += 1
         return result
-    # this is super dumb lol
-    # def arccos(x: float, error: float=1E-5):
-    #   if(x > 1 or x < -1):
-    #     raise Exception("Domain error: The domain is [-1, 1]")
-    #   step = 0.001
-    #   i = 0
-    #   while(i <= 2 * CalcMath.PI):
-    #     if(CalcMath.cos(i) >= x - error and CalcMath.cos(i) <= x + error):
-    #       return i
-    #     if(i + step >= 2 * CalcMath.PI):
-    #       i = 0
-    #       step /= 10
-    #     i += step
 
     def exp(exponent: float, error: float = 1E-11) -> float:
         n = 0

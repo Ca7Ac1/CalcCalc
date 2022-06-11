@@ -268,13 +268,13 @@ class LogTerm(Term):
         self.value = value
 
     def solve(self, x: float) -> float:
-        return self.coefficient * calcmath.CalcMath.log(self.value.solve(x), self.base)
+        return self.coefficient * calcmath.CalcMath.log(self.value.solve(float(x)), float(self.base))
 
     def deriv_solve(self, x: float, error: float = 1E-11) -> float:
         return self.deriv_term().solve()
 
     def deriv_term(self) -> Term:
-        return DivTerm(self.value.deriv_term(), ProductTerm(LogTerm(1, CalcMath.calcmath.e, base), value))
+        return DivTerm(self.value.deriv_term(), ProductTerm(LogTerm(1, calcmath.CalcMath.e, self.base), self.value))
 
     def __str__(self):
         return f"({self.coefficient} * log base {self.base} of {str(self.value)})"
@@ -317,3 +317,39 @@ class CosTerm(Term):
 
     def __str__(self):
         return f"{self.coefficient} * cos({self.value})"
+
+### TANTERM ###
+class TanTerm(Term):
+    def __init__(self, coefficient: float, value: Term):
+        self.coefficient = coefficient
+        self.value = value
+
+    def solve(self, x: float) -> float:
+        return self.coefficient * calcmath.CalcMath.tan(self.value.solve(x))
+
+    def deriv_solve(self, x: float, error: float = 1E-11) -> float:
+        return self.deriv_term().solve(x)
+
+    def deriv_term(self) -> Term:
+        return ProductTerm(self.value.deriv_term(), TanTerm(self.coefficient, self.value))
+
+    def __str__(self):
+        return f"{self.coefficient} * tan({self.value})"
+
+### ARCTANTERM ###
+class ArctanTerm(Term):
+    def __init__(self, coefficient: float, value: Term):
+        self.coefficient = coefficient
+        self.value = value
+
+    def solve(self, x: float) -> float:
+        return self.coefficient * calcmath.CalcMath.arctan(self.value.solve(x))
+
+    def deriv_solve(self, x: float, error: float = 1E-11) -> float:
+        return self.deriv_term().solve(x)
+
+    def deriv_term(self) -> Term:
+        return ProductTerm(self.value.deriv_term(), ArctanTerm(self.coefficient, self.value))
+
+    def __str__(self):
+        return f"{self.coefficient} * arctan({self.value})"
